@@ -5,7 +5,14 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Thomas Dalby Photography",
-  description: "Photography portfolio by Thomas Dalby."
+  description: "Photography portfolio by Thomas Dalby.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" }
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }]
+  }
 };
 
 export default function RootLayout({
