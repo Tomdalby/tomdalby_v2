@@ -66,11 +66,11 @@ To create a modern, performant, dark-mode portfolio website for a photographer, 
     *   [x] Set up Astro project (`npm create astro@latest`).
     *   [x] Configure `astro.config.mjs` (e.g., site metadata).
     *   [x] Set up basic file structure.
-    *   [ ] Define global styles (`global.css`): dark mode, typography, basic resets.
-    *   [ ] Create `BaseLayout.astro`.
+    *   [x] Define global styles (`global.css`): dark mode, typography, basic resets.
+    *   [x] Create `BaseLayout.astro`.
 *   **Data Structure:**
-    *   [ ] Define structure for `photoStories.json`.
-    *   [ ] Populate `photoStories.json` with placeholder data for 2-3 stories.
+    *   [x] Define structure for `photoStories.json`.
+    *   [x] Populate `photoStories.json` with placeholder data for 2-3 stories.
 *   **Header & Footer:**
     *   [ ] Create `Header.astro` component (Logo, Name, Menu, Instagram link).
     *   [ ] Style Header.

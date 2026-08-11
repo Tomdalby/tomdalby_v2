@@ -15,18 +15,19 @@ This document provides a technical overview and context for the photographer por
 *   **Layout:** Primarily CSS Grid, potentially Flexbox for simpler elements.
 *   **Styling:** CSS / SCSS (scoped within Astro components + global styles).
 *   **Interactivity:** Vanilla JavaScript (for custom cursor, potentially other effects). Astro Islands architecture will be leveraged for JS components.
-*   **Data Management:** JSON file (`src/data/photoStories.json`) for photo story content.
+*   **Data Management:** JSON file (`src/data/photoStories.json`) for photo story content. (Structure defined, placeholder data added)
 *   **Deployment:** GitHub Actions workflow to build and deploy the Astro site to the `gh-pages` branch.
 *   **Package Manager:** npm (installed via Homebrew/Node.js).
 
 ## 3. Architecture & Key Decisions
 
 *   **Component-Based:** Utilizing Astro components (`.astro`) for UI elements (Header, Footer, Grid Items, etc.).
-*   **Layouts:** Using Astro layouts (`src/layouts/BaseLayout.astro`) for consistent page structure.
+*   **Layouts:** Using Astro layouts (`src/layouts/BaseLayout.astro`) for consistent page structure. (Base layout created)
 *   **Dynamic Routing:** Astro's file-based dynamic routing for photo story pages (`src/pages/stories/[slug].astro`).
 *   **Data Fetching:** Astro's `Astro.glob()` or standard `fetch/fs` methods to read data from `photoStories.json` at build time.
 *   **Image Handling:** Leveraging Astro's built-in `<Image>` component for optimization and lazy loading.
 *   **Custom Cursor:** Implemented likely via a client-side JavaScript module/component, potentially using an Astro framework island (e.g., Preact/React if needed, but starting with Vanilla JS).
+*   **JSON Data Structure:** Defined with fields: `slug`, `title`, `description`, `coverImage`, `galleryImages`.
 
 ## 4. Potential Challenges & Notes
 
@@ -35,12 +36,8 @@ This document provides a technical overview and context for the photographer por
 *   **Image Optimization:** Fine-tuning Astro's image component settings for optimal balance between quality and file size.
 *   **GitHub Actions Workflow:** Setting up the deployment workflow correctly for Astro builds targeting GitHub Pages (base path configuration might be needed).
 *   **Ease of Update:** Ensuring the JSON structure and the process for adding new stories are straightforward for the end-user.
-
-## 5. Current Status
-
-*   Project initialized with Astro.
-*   Basic file structure created.
-*   Git repository initialized.
-*   Node.js/npm installed via Homebrew.
+*   **Node.js/npm installed via Homebrew.
+*   BaseLayout component created.
+*   JSON data file created with initial structure and placeholders.
 
 *(This file should be updated as major technical decisions are made or issues are encountered.)* 

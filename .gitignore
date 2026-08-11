@@ -1,5 +1,8 @@
 # build output
 dist/
+.next/
+out/
+
 # generated types
 .astro/
 
@@ -16,9 +19,13 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.env.local
 
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
+
+# TypeScript incremental build info
+*.tsbuildinfo

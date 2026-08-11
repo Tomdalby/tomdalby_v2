@@ -1,14 +1,23 @@
 {
-  "name": "regular-radiation",
-  "type": "module",
+  "name": "thomasdalbywebsite",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "astro": "^5.7.9"
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.6",
+    "typescript": "^6.0.3"
   }
 }
