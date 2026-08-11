@@ -32,7 +32,7 @@ export default function AboutPage() {
               alt="Portrait of Thomas Dalby"
               className="about-image"
               height={1100}
-              sizes="(max-width: 900px) 55vw, 28vw"
+              sizes="(max-width: 900px) 92vw, 28vw"
               src={aboutContent.image}
               width={900}
             />
@@ -44,7 +44,7 @@ export default function AboutPage() {
                 alt={`Thomas Dalby — photo ${i + 1}`}
                 className="about-image"
                 height={1100}
-                sizes="(max-width: 900px) 38vw, 18vw"
+                sizes="(max-width: 900px) 92vw, 18vw"
                 src={src}
                 width={900}
               />
