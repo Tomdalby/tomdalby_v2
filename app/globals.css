@@ -1509,6 +1509,11 @@ body:has(.about-page) {
     touch-action: auto;
   }
 
+  /* Kill any leftover marquee translate so stacked cards cannot overlap */
+  .home-page .feed-track {
+    transform: none !important;
+  }
+
   .feed-card-duplicate {
     display: none;
   }

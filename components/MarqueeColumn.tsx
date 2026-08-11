@@ -12,6 +12,7 @@ type MarqueeColumnProps = {
 /** Shared visual scroll speed for both homepage columns (px per second). */
 const SCROLL_SPEED_PX_PER_SEC = 28;
 const DRAG_THRESHOLD_PX = 4;
+const MOBILE_MQ = "(max-width: 900px)";
 
 export default function MarqueeColumn({ collections: items, direction }: MarqueeColumnProps) {
   const columnRef = useRef<HTMLDivElement>(null);
@@ -22,6 +23,7 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
   const pointerActiveRef = useRef(false);
   const dragStartYRef = useRef(0);
   const dragStartOffsetRef = useRef(0);
+  const isMobileRef = useRef(false);
 
   const wrapOffset = (value: number) => {
     const half = halfRef.current;
@@ -34,10 +36,16 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
   const applyOffset = () => {
     const track = trackRef.current;
     if (!track) return;
+    // Mobile is a static stacked feed — never leave a translate that overlaps cards
+    if (isMobileRef.current) {
+      track.style.transform = "";
+      return;
+    }
     track.style.transform = `translate3d(0, ${-offsetRef.current}px, 0)`;
   };
 
   const nudge = (deltaPx: number) => {
+    if (isMobileRef.current) return;
     offsetRef.current = wrapOffset(offsetRef.current + deltaPx);
     applyOffset();
   };
@@ -48,10 +56,31 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
     if (!track || !column) return;
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const mobileQuery = window.matchMedia("(max-width: 900px)");
-    const enableAutoScroll = () => !reducedMotion && !mobileQuery.matches;
+    const mobileQuery = window.matchMedia(MOBILE_MQ);
+
+    const syncMobile = () => {
+      isMobileRef.current = mobileQuery.matches;
+      if (mobileQuery.matches) {
+        offsetRef.current = 0;
+        halfRef.current = 0;
+        draggingRef.current = false;
+        pointerActiveRef.current = false;
+        applyOffset();
+      }
+    };
+
+    syncMobile();
+
+    const enableAutoScroll = () =>
+      !reducedMotion && !isMobileRef.current;
 
     const measureHalf = () => {
+      if (isMobileRef.current) {
+        offsetRef.current = 0;
+        applyOffset();
+        return true;
+      }
+
       const cards = Array.from(track.querySelectorAll<HTMLElement>(".preview-card"));
       const loopCount = Math.floor(cards.length / 2);
       if (loopCount === 0) return false;
@@ -117,12 +146,20 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
     }, 200);
 
     const onWheel = (event: WheelEvent) => {
+      if (isMobileRef.current) return;
       if (Math.abs(event.deltaY) < 0.5) return;
       event.preventDefault();
       nudge(event.deltaY);
     };
 
     column.addEventListener("wheel", onWheel, { passive: false });
+
+    const onMobileChange = () => {
+      syncMobile();
+      halfRef.current = 0;
+      measureHalf();
+    };
+    mobileQuery.addEventListener("change", onMobileChange);
 
     let rafId = 0;
     let lastTime = performance.now();
@@ -146,6 +183,7 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
       cancelAnimationFrame(rafId);
       window.clearInterval(remeasureId);
       column.removeEventListener("wheel", onWheel);
+      mobileQuery.removeEventListener("change", onMobileChange);
       resizeObserver.disconnect();
       track.querySelectorAll("img").forEach((img) => {
         img.removeEventListener("load", onImageLoad);
@@ -155,6 +193,7 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
   }, [direction, items.length]);
 
   const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isMobileRef.current) return;
     if (event.pointerType === "mouse" && event.button !== 0) return;
     pointerActiveRef.current = true;
     dragStartYRef.current = event.clientY;
@@ -162,6 +201,7 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
   };
 
   const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isMobileRef.current) return;
     if (!pointerActiveRef.current) return;
 
     const delta = event.clientY - dragStartYRef.current;
@@ -180,6 +220,7 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
   };
 
   const endPointer = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (isMobileRef.current) return;
     if (draggingRef.current) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
