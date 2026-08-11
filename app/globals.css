@@ -695,7 +695,10 @@ body.custom-cursor-active * {
   overflow: hidden;
   width: 100%;
   cursor: grab;
-  touch-action: none;
+  /* Allow vertical page scroll; JS axis-lock claims horizontal swipes */
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .horizontal-scroll-viewport:active {
@@ -711,6 +714,7 @@ body.custom-cursor-active * {
 .horizontal-scroll-item {
   flex-shrink: 0;
   line-height: 0;
+  -webkit-user-drag: none;
 }
 
 .horizontal-scroll-item img {
@@ -718,6 +722,9 @@ body.custom-cursor-active * {
   width: auto;
   display: block;
   border-radius: 0;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
 }
 
 .gallery-layout.layout-horizontal-scroll + .gallery-layout.layout-adaptive,

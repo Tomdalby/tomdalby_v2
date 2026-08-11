@@ -10,8 +10,8 @@ type GalleryHorizontalScrollProps = {
   items: PhotoItem[];
 };
 
-const USER_SCROLL_IDLE_MS = 0;
-const DRAG_THRESHOLD_PX = 4;
+const USER_SCROLL_IDLE_MS = 1800;
+const DRAG_THRESHOLD_PX = 8;
 
 /** Seamless horizontal strip; auto-drifts left via transform; horizontal wheel + drag override. */
 export default function GalleryHorizontalScroll({ title, items }: GalleryHorizontalScrollProps) {
@@ -24,7 +24,10 @@ export default function GalleryHorizontalScroll({ title, items }: GalleryHorizon
   const userScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draggingRef = useRef(false);
   const pointerActiveRef = useRef(false);
+  const pointerIdRef = useRef<number | null>(null);
+  const dragAxisRef = useRef<"x" | "y" | null>(null);
   const dragStartXRef = useRef(0);
+  const dragStartYRef = useRef(0);
   const dragStartOffsetRef = useRef(0);
 
   const images = items.filter((item) => item.kind !== "pdf");
@@ -122,6 +125,82 @@ export default function GalleryHorizontalScroll({ title, items }: GalleryHorizon
     };
   }, [loopDurationSec]);
 
+  // Non-passive touch/pointer listeners so horizontal swipes work on mobile
+  // without killing vertical page scroll (axis lock after a short threshold).
+  useEffect(() => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+
+    const resetPointer = () => {
+      draggingRef.current = false;
+      pointerActiveRef.current = false;
+      pointerIdRef.current = null;
+      dragAxisRef.current = null;
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType === "mouse" && event.button !== 0) return;
+      pointerActiveRef.current = true;
+      pointerIdRef.current = event.pointerId;
+      dragAxisRef.current = null;
+      draggingRef.current = false;
+      dragStartXRef.current = event.clientX;
+      dragStartYRef.current = event.clientY;
+      dragStartOffsetRef.current = offsetRef.current;
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (!pointerActiveRef.current) return;
+      if (pointerIdRef.current !== null && event.pointerId !== pointerIdRef.current) return;
+
+      const dx = event.clientX - dragStartXRef.current;
+      const dy = event.clientY - dragStartYRef.current;
+
+      if (!dragAxisRef.current) {
+        if (Math.abs(dx) < DRAG_THRESHOLD_PX && Math.abs(dy) < DRAG_THRESHOLD_PX) return;
+        dragAxisRef.current = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        if (dragAxisRef.current === "x") {
+          draggingRef.current = true;
+          viewport.setPointerCapture(event.pointerId);
+          markUserScrolling();
+        }
+      }
+
+      if (dragAxisRef.current !== "x") return;
+
+      event.preventDefault();
+      offsetRef.current = wrapOffset(dragStartOffsetRef.current - dx);
+      applyOffset();
+      markUserScrolling();
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      if (pointerIdRef.current !== null && event.pointerId !== pointerIdRef.current) return;
+      if (draggingRef.current) {
+        try {
+          viewport.releasePointerCapture(event.pointerId);
+        } catch {
+          // ignore if capture was already released
+        }
+        markUserScrolling();
+      }
+      resetPointer();
+    };
+
+    viewport.addEventListener("pointerdown", onPointerDown);
+    // passive: false so preventDefault works while dragging horizontally on iOS/Android
+    viewport.addEventListener("pointermove", onPointerMove, { passive: false });
+    viewport.addEventListener("pointerup", onPointerUp);
+    viewport.addEventListener("pointercancel", onPointerUp);
+
+    return () => {
+      viewport.removeEventListener("pointerdown", onPointerDown);
+      viewport.removeEventListener("pointermove", onPointerMove);
+      viewport.removeEventListener("pointerup", onPointerUp);
+      viewport.removeEventListener("pointercancel", onPointerUp);
+    };
+  }, []);
+
   const onWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     // Only the horizontal wheel (secondary / tilt) drives the carousel.
     // Vertical main-wheel scroll is left alone so the page can scroll.
@@ -131,41 +210,6 @@ export default function GalleryHorizontalScroll({ title, items }: GalleryHorizon
     nudge(event.deltaX);
   };
 
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse" && event.button !== 0) return;
-    pointerActiveRef.current = true;
-    dragStartXRef.current = event.clientX;
-    dragStartOffsetRef.current = offsetRef.current;
-  };
-
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!pointerActiveRef.current) return;
-
-    const delta = event.clientX - dragStartXRef.current;
-    if (!draggingRef.current && Math.abs(delta) < DRAG_THRESHOLD_PX) return;
-
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-
-    if (!draggingRef.current) {
-      draggingRef.current = true;
-      viewport.setPointerCapture(event.pointerId);
-      markUserScrolling();
-    }
-
-    offsetRef.current = wrapOffset(dragStartOffsetRef.current - delta);
-    applyOffset();
-  };
-
-  const endPointer = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (draggingRef.current) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-      markUserScrolling();
-    }
-    draggingRef.current = false;
-    pointerActiveRef.current = false;
-  };
-
   return (
     <section
       aria-label={`${title} carousel`}
@@ -173,11 +217,6 @@ export default function GalleryHorizontalScroll({ title, items }: GalleryHorizon
     >
       <div
         className="horizontal-scroll-viewport"
-        onPointerCancel={endPointer}
-        onPointerDown={onPointerDown}
-        onPointerLeave={endPointer}
-        onPointerMove={onPointerMove}
-        onPointerUp={endPointer}
         onWheel={onWheel}
         ref={viewportRef}
       >
