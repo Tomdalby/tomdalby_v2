@@ -57,6 +57,10 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const mobileQuery = window.matchMedia(MOBILE_MQ);
+    const feed = column.closest(".home-feed");
+
+    const feedIsHidden = () =>
+      !!feed && window.getComputedStyle(feed).display === "none";
 
     const syncMobile = () => {
       isMobileRef.current = mobileQuery.matches;
@@ -72,10 +76,10 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
     syncMobile();
 
     const enableAutoScroll = () =>
-      !reducedMotion && !isMobileRef.current;
+      !reducedMotion && !isMobileRef.current && !feedIsHidden();
 
     const measureHalf = () => {
-      if (isMobileRef.current) {
+      if (isMobileRef.current || feedIsHidden()) {
         offsetRef.current = 0;
         applyOffset();
         return true;
@@ -146,7 +150,7 @@ export default function MarqueeColumn({ collections: items, direction }: Marquee
     }, 200);
 
     const onWheel = (event: WheelEvent) => {
-      if (isMobileRef.current) return;
+      if (isMobileRef.current || feedIsHidden()) return;
       if (Math.abs(event.deltaY) < 0.5) return;
       event.preventDefault();
       nudge(event.deltaY);

@@ -87,6 +87,11 @@ body.custom-cursor-active * {
   overflow: hidden;
 }
 
+/* Mobile feed is markup-only on desktop; shown under max-width: 900px */
+.home-feed--mobile {
+  display: none;
+}
+
 .feed-column-wrap {
   position: relative;
   overflow: hidden;
@@ -1490,6 +1495,15 @@ body:has(.about-page) {
     padding: 1rem 1.15rem;
   }
 
+  /* Mobile: only the dedicated single-column feed (desktop feed hidden below). */
+  .home-feed--desktop {
+    display: none;
+  }
+
+  .home-feed--mobile {
+    display: grid;
+  }
+
   .home-feed {
     grid-template-columns: 1fr;
     height: auto;
@@ -1500,6 +1514,7 @@ body:has(.about-page) {
   .feed-column-wrap {
     height: auto;
     overflow: visible;
+    position: static;
   }
 
   .feed-column {
@@ -1507,11 +1522,13 @@ body:has(.about-page) {
     overflow: visible;
     cursor: default;
     touch-action: auto;
+    position: static;
   }
 
-  /* Kill any leftover marquee translate so stacked cards cannot overlap */
+  /* No marquee translate on phones — cards must stack, never overlap */
   .home-page .feed-track {
     transform: none !important;
+    will-change: auto;
   }
 
   .feed-card-duplicate {

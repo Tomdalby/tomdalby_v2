@@ -49,9 +49,14 @@ export default function HomePage() {
   return (
     <main className="home-page">
       <BurgerMenu />
-      <section className="home-feed">
+      {/* Desktop: two marquee columns (unchanged). */}
+      <section className="home-feed home-feed--desktop" aria-label="Gallery feed">
         <MarqueeColumn collections={left} direction="up" />
         <MarqueeColumn collections={right} direction="down" />
+      </section>
+      {/* Mobile: one static stack — one card per set, no overlapping columns. */}
+      <section className="home-feed home-feed--mobile" aria-label="Gallery feed">
+        <MarqueeColumn collections={left} direction="up" />
       </section>
     </main>
   );
