@@ -1484,6 +1484,12 @@ body:has(.about-page) {
     --home-preview-max-h: calc(100dvh - 1.5rem);
   }
 
+  /* Home cards — sit title nearer the bottom on phones only */
+  .preview-overlay {
+    bottom: 25%;
+    padding: 1rem 1.15rem;
+  }
+
   .home-feed {
     grid-template-columns: 1fr;
     height: auto;
